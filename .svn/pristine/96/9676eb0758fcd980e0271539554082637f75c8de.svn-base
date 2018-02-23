@@ -1,0 +1,12 @@
+server.port=8081
+
+spring.redis.host=localhost
+spring.redis.port=6379
+
+zookeeper.connectString=127.0.0.1:2181
+zookeeper.znode.gateway=/gateway
+zookeeper.znode.camera=/camera
+
+gateway.tcp.port=3000
+gateway.http.port=8080
+gateway.http.path=/jpeg

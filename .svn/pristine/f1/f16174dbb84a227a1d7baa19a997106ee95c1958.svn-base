@@ -1,0 +1,42 @@
+package com.skcc.servicerouter.controller;
+
+import com.skcc.servicerouter.repository.HttpSession;
+import com.skcc.servicerouter.repository.redis.HttpSessionRepository;
+import com.skcc.servicerouter.service.RouteInfo;
+import com.skcc.servicerouter.service.RouteService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+public class RouteController {
+
+    @Autowired
+    private HttpSessionRepository httpSessionRepository;
+
+    @Autowired
+    private RouteService routeService;
+
+    @GetMapping("routes")
+    public RouteInfo getRouteInfo(@RequestParam("cameraId") long cameraId, @RequestParam("scheme") String scheme,
+                                  @RequestParam(required = false, value ="jsessionId") String jsessionId) {
+
+        HttpSession httpSession = httpSessionRepository.getHttpSession(jsessionId);
+        if(System.currentTimeMillis() > httpSession.getLastAccessedTime() + (httpSession.getMaxInactiveInterval() * 1000)) {
+            throw new RuntimeException("session expired");
+        }
+
+        return routeService.getRouteInfo(cameraId, scheme);
+    }
+
+    @ExceptionHandler
+    public Map<String, String> exception(Exception e) {
+        Map<String, String> result = new HashMap<>();
+        result.put("result", "fail");
+        result.put("message", e.getMessage());
+
+        return result;
+    }
+}
